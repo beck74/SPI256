@@ -10,7 +10,7 @@
 const int BYTE_1K = 0x04;//一次读写多少个256字节 ,4*256是1K
 const int WR_BUFFER_WRITE = 32 * BYTE_1K;//32M
 const int WR_BUFFER_READ = 32 * BYTE_1K;//32K ，读最多一次32k
-
+const int ALLOWED_SLOTS = 4;//通道数
 
 const bool B_4BYTE = true;//是否使用4Byte模式
 const int CLK_DIV_VAL_HS = 0x02;//5倍分频
@@ -920,14 +920,13 @@ bool ReadRDSR(HANDLE h, BYTE &ChSel)
 	regBuf.Push(0xC040, 0x01);
 
 	WriteFPGA(h, regBuf.GetData(), regBuf.GetLength());
-	//WriteDMANotSetLength(h, pBuf, ulLen);
 	do
 	{
 		ReadCPLD(h, 0xC040, byStatus);
 	} while (byStatus != 0);
 
 	BYTE st0, st1, st2, st3;
-	//if(ChSel)
+
 	// CH0
 	//PRINT:[0xC060..0xC067]
 	ReadCPLD(h, 0xC060, byStatus);
@@ -961,6 +960,110 @@ bool ReadRDSR(HANDLE h, BYTE &ChSel)
 	return st0/* | st1 | st2 | st3*/;
 
 }
+
+bool SetCheckID(HANDLE h, BYTE &ChSel)
+{
+	BYTE byStatus;//状态
+	CRegBuffer regBuf;
+
+	regBuf.Init();
+	//1.1
+	regBuf.Push(0xC030, 0x02);
+	regBuf.Push(0xC031, 0x01);//BYTE_ORDER
+							  //3.1
+	regBuf.Push(0xC801, SPI_CMD_WREN);
+	regBuf.Push(0xC800, 0x02);// WREN_FORMAT
+							  //3.2
+	regBuf.Push(0xC803, SPI_CMD_RDSR);
+	regBuf.Push(0xC802, 0x89);//RDSR_FORMAT
+							  //3.3
+	regBuf.Push(0xC804, 0x64);//WREN_LOOP_LIMIT
+							  //3.4
+	regBuf.Push(0xC808, 0xFF);
+	regBuf.Push(0xC807, 0xFF);
+	regBuf.Push(0xC806, 0xFF);
+	regBuf.Push(0xC805, 0xFC);// RDSR_CHK_MASK
+							  //3.5
+	regBuf.Push(0xC80C, 0x00);
+	regBuf.Push(0xC80B, 0x00);
+	regBuf.Push(0xC80A, 0x00);
+	regBuf.Push(0xC809, 0x02);// RDSR_CHK_TARGET
+							  //3.6
+	regBuf.Push(0xC811, 0x00);
+	regBuf.Push(0xC810, 0x00);
+	regBuf.Push(0xC80F, 0x00);
+	regBuf.Push(0xC80E, 0x00);
+	regBuf.Push(0xC80D, 0x02);//DATA_BYTE_NUM	读ID需要读两个字节
+							  //3.7
+	regBuf.Push(0xC816, 0x00);
+	regBuf.Push(0xC815, 0x00);
+	regBuf.Push(0xC814, 0x00);
+	regBuf.Push(0xC813, 0x00);
+	regBuf.Push(0xC812, 0x01);// CMD_LOOP_NUM	
+							  //3.8
+	regBuf.Push(0xC818, 0x00);
+	regBuf.Push(0xC817, 0x02);//DAT_RDY_THRESHD
+							  //3.9
+	regBuf.Push(0xC819, 0x00);// USER_CMD_DEF
+							  //3.10
+	regBuf.Push(0xC81A, 0x06);//CSN_HIGH_PULSE
+
+							  //4.1
+	regBuf.Push(0xC82F, 0x00);
+	regBuf.Push(0xC82E, 0x00);
+	regBuf.Push(0xC82D, 0x00);
+	regBuf.Push(0xC82C, 0x00);
+	regBuf.Push(0xC82B, 0x00);
+	regBuf.Push(0xC82A, 0x00);
+	regBuf.Push(0xC829, 0x00);
+	regBuf.Push(0xC828, 0x00);
+	regBuf.Push(0xC827, 0x00);
+	regBuf.Push(0xC826, 0x00);
+	regBuf.Push(0xC825, 0x00);
+	regBuf.Push(0xC824, 0x00);
+	regBuf.Push(0xC823, 0x00);
+	regBuf.Push(0xC822, 0x00);
+	regBuf.Push(0xC821, 0x00);
+	regBuf.Push(0xC820, 0x00);// CMD_ADDR**************
+							  //4.2
+	regBuf.Push(0xC834, 0x00);
+	regBuf.Push(0xC833, 0x00);
+	regBuf.Push(0xC832, 0x00);
+	regBuf.Push(0xC831, 0x00);
+	regBuf.Push(0xC830, 0x00);// CMD_ADDR_INC*****************
+							  //4.3
+	regBuf.Push(0xC835, 0x00);// CMD_NEED_WREN****************
+							  //4.4
+	regBuf.Push(0xC836, SPI_CMD_REMS);// CMD_INDEX****************
+									  //4.5
+	regBuf.Push(0xC837, 0x00);// DATA_DIREC****************
+							  //4.6
+	regBuf.Push(0xC838, 0x01);// SEG1_BUS_WIDTH
+							  //4.7
+	regBuf.Push(0xC839, 0x03);// ADDR_BYTE_NUM 此处需要注意根据芯片手册更改
+							  //4.8
+	regBuf.Push(0xC83A, 0x01);// SEG2_BUS_WIDTH
+							  //4.9
+	regBuf.Push(0xC83B, 0x01);// CMD_DAT_TX_RX****************
+							  //4.10
+	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
+							  //4.11
+	regBuf.Push(0xC02A, ChSel);//使能该通道
+							   //4.12
+	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
+							  //5.1
+	regBuf.Push(0xC040, 0x01);
+
+	WriteFPGA(h, regBuf.GetData(), regBuf.GetLength());
+	do
+	{
+		ReadCPLD(h, 0xC040, byStatus);
+	} while (byStatus != 0);
+
+	return true;
+
+}
+
 void WINAPI SPIErase(HANDLE h, PDEVICE p, PBYTE pBuf, LPVOID pf[], BYTE &ChSel)
 {
 	BYTE byStatus;//状态
@@ -1291,13 +1394,35 @@ void WINAPI SPIBlank(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 }
 void WINAPI SPICheckID(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 {
+	BYTE byStatus;
+	int i;
 
+	SetCheckID(h, ChSel);
+
+	for (i = 0; i < ALLOWED_SLOTS; i++)
+	{
+		if ((ChSel&(1 << i)) != 0)
+		{
+			ReadCPLD(h, 0xC060 + i * 8, byStatus);
+			if (byStatus != p->wManuID)
+			{
+				ChSel = ChSel&(~(1 << i));
+				continue;
+			}
+			ReadCPLD(h, 0xC061 + i * 8, byStatus);
+			if (byStatus != p->wDeviceID)
+			{
+				ChSel = ChSel&(~(1 << i));
+				continue;
+			}
+		}
+	}
 }
 
 
 ULONG WINAPI GetDllInfo(void)
 {
-	return EN_PROG + EN_READ + EN_VERIFY + EN_ERASE;// +EN_IDCHECK + EN_BLANK;
+	return EN_PROG + EN_READ + EN_VERIFY + EN_ERASE + EN_IDCHECK;// +EN_BLANK;
 }
 
 BOOL WINAPI DllMain(HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved)

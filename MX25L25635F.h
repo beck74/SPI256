@@ -21,6 +21,7 @@
 #define SPI_CMD_PP				0x02//Page Program
 #define SPI_CMD_READ			0x03//Read
 #define SPI_CMD_VERIFY			SPI_CMD_READ//Verify
+#define SPI_CMD_REMS			0x90//manufacturer & device ID
 // DATA_DIRECT
 #define SPI_PROG       0X28
 #define SPI_READ       0X01
