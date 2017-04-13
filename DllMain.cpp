@@ -1287,103 +1287,11 @@ void WINAPI SPIVerify(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 
 void WINAPI SPIBlank(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 {
-	//const int iLen = 4096;
 
-	//BYTE byOldStatus=0, byStatus;
-	//BYTE byBuf[iLen];
-	//ULONG ulRemain, ulStartAddr;
-	//INT64 llChipSize;
-	//ULONG ulPbVlaue;
-	//CRegBuffer regBuf;
-
-	//llChipSize = p->llMemSize[0];
-	//if (ChSel == 0)
-	//	return;
-	//WriteCPLD(h, 0xC030, 5);//Clock
-
-	//memset(byBuf, 0xFF, sizeof byBuf);
-
-	//ulRemain = llChipSize;
-	//PbInit(pf, ChSel);
-	//ulStartAddr = 0;
-
-	//while (ulRemain > 0)
-	//{
-	//	regBuf.Init();
-	//	regBuf.Push(F_CMD, 0x7C);
-	//	regBuf.Push(F_SEL, ChSel);
-
-	//	regBuf.Push(0xC025, (ulStartAddr >> 16) & 0xFF);
-	//	regBuf.Push(0xC024, (ulStartAddr >> 8) & 0xFF);
-	//	regBuf.Push(0xC023, (ulStartAddr & 0xFF));
-
-	//	regBuf.Push(0xC029, (iLen >> 24) & 0xFF);
-	//	regBuf.Push(0xC028, (iLen >> 16) & 0xFF);
-	//	regBuf.Push(0xC027, (iLen >> 8) & 0xFF);
-	//	regBuf.Push(0xC026, (iLen) & 0xFF);
-
-	//	WriteFPGA(h, regBuf.GetData(), regBuf.GetLength());
-	//	WriteDMANotSetLength(h, byBuf, iLen);
-	//	do
-	//	{
-	//		ReadCPLD(h, 0xC040, byStatus);
-	//	} while (byStatus != 0);
-	//	ReadCPLD(h, 0xC035, byStatus);
-
-	//	if ((byStatus != 0) && (byStatus != byOldStatus))
-	//	{
-	//		ChSel = ChSel&(~byStatus);
-	//		byOldStatus = byStatus;
-	//	}
-	//	if ((byStatus == 0xF) || (ChSel == 0))
-	//		break;
-
-	//	ulRemain -= iLen;
-	//	ulStartAddr += iLen;
-	//	ulPbVlaue = (llChipSize - ulRemain) * 100 / llChipSize;
-	//	PbUpdate(pf, ulPbVlaue, ChSel);
-	//}
-	//WriteCPLD(h, 0xC030, 2);
 }
 void WINAPI SPICheckID(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 {
-	//BYTE byStatus;
-	//int i;
-	//BOOL bM[ALLOWED_SLOTS];
-	//CRegBuffer regBuf;
-	//WriteCPLD(h, 0xC030, 5);
 
-	//regBuf.Init();
-	//regBuf.Push(F_CMD, 0x9F);
-	//regBuf.Push(F_SEL, ChSel);
-	//regBuf.Push(0xC029, 0);
-	//regBuf.Push(0xC028, 0);
-	//regBuf.Push(0xC027, 0);
-	//regBuf.Push(0xC026, 3);
-	//regBuf.Push(F_EXEC, 1);
-	//WriteFPGA(h, regBuf.GetData(), regBuf.GetLength());
-
-	//do
-	//{
-	//	ReadCPLD(h, F_EXEC, byStatus);
-	//} while (byStatus != 0);
-
-	//for (i = 0; i < ALLOWED_SLOTS; i++)
-	//{
-	//	bM[i] = TRUE;
-	//	if ((ChSel&(1 << i)) != 0)
-	//	{
-	//		ReadCPLD(h, 0xC060 + i * 8, byStatus);
-	//		bM[i] = (byStatus == p->wManuID);
-	//		ReadCPLD(h, 0xC061 + i * 8, byStatus);
-	//		bM[i] = (bM[i] && (byStatus == p->wDeviceID));
-	//		ReadCPLD(h, 0xC062 + i * 8, byStatus);
-
-	//		if (!bM[i])
-	//			ChSel = ChSel&(~(1 << i));
-	//	}
-	//}
-	//WriteCPLD(h, 0xC030, 2);
 }
 
 
