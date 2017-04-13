@@ -16,7 +16,8 @@ const bool B_4BYTE = true;//是否使用4Byte模式
 const int CLK_DIV_VAL_HS = 0x02;//5倍分频
 const int CLK_DIV_VAL_LS = 0x05;//5倍分频
 const ULONG StartAddr = 0;//起始地址
-const int CHSEL = 0x0F;
+
+//const int ChSel = 0x0F;
 void Enter4ByteMode(HANDLE h, BYTE ChSel)
 {
 	CRegBuffer regBuf;
@@ -103,7 +104,7 @@ void Enter4ByteMode(HANDLE h, BYTE ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							  //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
@@ -203,7 +204,7 @@ void Exit4ByteMode(HANDLE h, BYTE ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							  //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
@@ -308,7 +309,7 @@ BYTE Check4ByteMode(HANDLE h, BYTE ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							  //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
@@ -463,7 +464,7 @@ void SetWriteParam(HANDLE h,ULONG ulStartAddr, BOOL b4ByteMode,BYTE ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							   //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
@@ -585,7 +586,7 @@ void SetWriteParam(HANDLE h,ULONG ulStartAddr, BOOL b4ByteMode,BYTE ChSel)
 	//						  //4.10
 	//regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 	//						  //4.11
-	//regBuf.Push(0xC02A, CHSEL);//使能该通道
+	//regBuf.Push(0xC02A, ChSel);//使能该通道
 	//						  //4.12
 	//regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 	//						  //5.1
@@ -614,7 +615,7 @@ void SetVerifyParam(HANDLE h, ULONG ulStartAddr, BOOL b4ByteMode, BYTE ChSel)
 	regBuf.Push(0xC803, SPI_CMD_RDSR);
 	regBuf.Push(0xC802, 0x89);//RDSR_FORMAT
 							  //3.3
-	regBuf.Push(0xC804, 0x64);//WREN_LOOP_LIMIT
+	regBuf.Push(0xC804, 0xF0);//WREN_LOOP_LIMIT
 							  //3.4
 	regBuf.Push(0xC808, 0xFF);
 	regBuf.Push(0xC807, 0xFF);
@@ -639,11 +640,11 @@ void SetVerifyParam(HANDLE h, ULONG ulStartAddr, BOOL b4ByteMode, BYTE ChSel)
 	regBuf.Push(0xC812, 0x01);// CMD_LOOP_NUM
 							  //3.8
 	regBuf.Push(0xC818, 0x00);
-	regBuf.Push(0xC817, 0x02);//DAT_RDY_THRESHD****************
+	regBuf.Push(0xC817, 0x80);//DAT_RDY_THRESHD****************
 							  //3.9
 	regBuf.Push(0xC819, 0x00);// USER_CMD_DEF
 							  //3.10
-	regBuf.Push(0xC81A, 0x06);//CSN_HIGH_PULSE
+	regBuf.Push(0xC81A, 0x80);//CSN_HIGH_PULSE
 
 							  //4.1
 	regBuf.Push(0xC82B, 0x00);
@@ -695,17 +696,17 @@ void SetVerifyParam(HANDLE h, ULONG ulStartAddr, BOOL b4ByteMode, BYTE ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							  //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
 
 	WriteFPGA(h, regBuf.GetData(), regBuf.GetLength());
-	BYTE byStatus;//状态
-	do
-	{
-		ReadCPLD(h, 0xC040, byStatus);
-	} while (byStatus != 0);
+	//BYTE byStatus;//状态
+	//do
+	//{
+	//	ReadCPLD(h, 0xC040, byStatus);
+	//} while (byStatus != 0);
 
 }
 
@@ -814,7 +815,7 @@ void SetReadParam(HANDLE h, ULONG ulStartAddr, BOOL b4ByteMode, BYTE ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							  //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
@@ -957,7 +958,7 @@ bool ReadRDSR(HANDLE h, BYTE &ChSel)
 	else
 		st3 = 0x00;
 
-	return st0/* | st1 | st2 | st3*/;
+	return st0 | st1 | st2 | st3;
 
 }
 
@@ -993,7 +994,7 @@ bool SetCheckID(HANDLE h, BYTE &ChSel)
 	regBuf.Push(0xC810, 0x00);
 	regBuf.Push(0xC80F, 0x00);
 	regBuf.Push(0xC80E, 0x00);
-	regBuf.Push(0xC80D, 0x02);//DATA_BYTE_NUM	读ID需要读两个字节
+	regBuf.Push(0xC80D, 0x04);//DATA_BYTE_NUM	读ID需要读两个字节
 							  //3.7
 	regBuf.Push(0xC816, 0x00);
 	regBuf.Push(0xC815, 0x00);
@@ -1034,13 +1035,13 @@ bool SetCheckID(HANDLE h, BYTE &ChSel)
 							  //4.3
 	regBuf.Push(0xC835, 0x00);// CMD_NEED_WREN****************
 							  //4.4
-	regBuf.Push(0xC836, SPI_CMD_REMS);// CMD_INDEX****************
+	regBuf.Push(0xC836, SPI_CMD_REID);// CMD_INDEX****************
 									  //4.5
 	regBuf.Push(0xC837, 0x00);// DATA_DIREC****************
 							  //4.6
 	regBuf.Push(0xC838, 0x01);// SEG1_BUS_WIDTH
 							  //4.7
-	regBuf.Push(0xC839, 0x03);// ADDR_BYTE_NUM 此处需要注意根据芯片手册更改
+	regBuf.Push(0xC839, 0x00);// ADDR_BYTE_NUM 此处需要注意根据芯片手册更改
 							  //4.8
 	regBuf.Push(0xC83A, 0x01);// SEG2_BUS_WIDTH
 							  //4.9
@@ -1075,10 +1076,12 @@ void WINAPI SPIErase(HANDLE h, PDEVICE p, PBYTE pBuf, LPVOID pf[], BYTE &ChSel)
 	ULONG ulPbValue;//进度条
 	INT64 llChipSize;//芯片大小
 	CRegBuffer regBuf;
-
 	llChipSize = p->llMemSize[0];
+	SPICheckID(h, p, pBuf, pf, ChSel);
 	if (ChSel == 0)
+	{
 		return;
+	}
 
 	regBuf.Init();
 	//1.1
@@ -1148,7 +1151,7 @@ void WINAPI SPIErase(HANDLE h, PDEVICE p, PBYTE pBuf, LPVOID pf[], BYTE &ChSel)
 							  //4.3
 	regBuf.Push(0xC835, 0x01);// CMD_NEED_WREN****************
 							  //4.4
-	regBuf.Push(0xC836, SPI_CMD_ERASE_CE1);// CMD_INDEX****************
+	regBuf.Push(0xC836, SPI_CMD_ERASE_CE2);// CMD_INDEX****************
 							  //4.5
 	regBuf.Push(0xC837, 0x00);// DATA_DIREC****************
 							  //4.6
@@ -1162,7 +1165,7 @@ void WINAPI SPIErase(HANDLE h, PDEVICE p, PBYTE pBuf, LPVOID pf[], BYTE &ChSel)
 							  //4.10
 	regBuf.Push(0xC83C, 0x01);//SEG3_BUS_WIDTH
 							  //4.11
-	regBuf.Push(0xC02A, CHSEL);//使能该通道
+	regBuf.Push(0xC02A, ChSel);//使能该通道
 							  //4.12
 	regBuf.Push(0xC050, 0x01);//ALLCH_SAME_CFG
 							  //5.1
@@ -1177,7 +1180,7 @@ void WINAPI SPIErase(HANDLE h, PDEVICE p, PBYTE pBuf, LPVOID pf[], BYTE &ChSel)
 		ulPbValue++;
 		PbUpdate(pf, ulPbValue, ChSel);
 		Sleep(1800);
-		ReadCPLD(h, 0xC040, byStatus);
+		//ReadCPLD(h, 0xC040, byStatus);
 		if (!ReadRDSR(h, ChSel))
 			break;
 	}while (ulPbValue != 100);
@@ -1194,11 +1197,13 @@ void WINAPI SPIProgram(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 	ULONG ulPbValue;//进度条
 	INT64 llChipSize;//芯片大小
 	CRegBuffer regBuf;
+	SPICheckID(h, p, pBuf, pf, ChSel);
 
 	if (ChSel == 0)
+	{
 		return;
+	}
 
-	//static ULONG ulStartAddr = 0;
 	if (B_4BYTE)
 		Enter4ByteMode(h,ChSel);
 	ulStartAddr = StartAddr;
@@ -1257,8 +1262,11 @@ void WINAPI SPIRead(HANDLE h, PDEVICE p, PBYTE pBuf, LPVOID pf[], BYTE &ChSel)
 	ULONG ulPbValue;
 	INT64 llChipSize;
 	CRegBuffer regBuf;
+	SPICheckID(h, p, pBuf, pf, ChSel);
 	if (ChSel == 0)
+	{
 		return;
+	}
 	if (B_4BYTE)
 		Enter4ByteMode(h, ChSel);
 	ulStartAddr = StartAddr;
@@ -1314,9 +1322,12 @@ void WINAPI SPIVerify(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 	ULONG ulPbValue;
 	INT64 llChipSize;
 	CRegBuffer regBuf;
+	SPICheckID(h, p, pBuf, pf, ChSel);
 
 	if (ChSel == 0)
+	{
 		return;
+	}
 	if (B_4BYTE)
 		Enter4ByteMode(h, ChSel);
 	ulStartAddr = StartAddr;
@@ -1329,6 +1340,7 @@ void WINAPI SPIVerify(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 
 	while (ulRemain > 0)
 	{
+		WriteCPLD(h, 0xC02A, ChSel);//每次检验C02A都会被改成最高位的单通道，所以执行第二个循环时，需要重新配置	C02A
 		regBuf.Init();
 		if (B_4BYTE)
 		{
@@ -1345,46 +1357,33 @@ void WINAPI SPIVerify(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 			regBuf.Push(0xC82C, 0x00);
 		}
 		WriteFPGA(h, regBuf.GetData(), regBuf.GetLength());
-		//BYTE byStatus;//状态
-		do
-		{
-			ReadCPLD(h, 0xC040, byStatus);
-		} while (byStatus != 0);
-
 		WriteDMANotSetLength(h, pBuf, ulLen);
 		do
 		{
 			ReadCPLD(h, 0xC040, byStatus);
 		} while (byStatus != 0);
-		//ReadCPLD(h, 0xC035, byStatus);
-
-		//if ((byStatus != 0) && (byStatus != byOldStatus))
-		//{
-		//	ChSel = ChSel&(~byStatus);
-		//	byOldStatus = byStatus;
-		//}
-		//if (byStatus == 0xF || ChSel == 0)
-		//	break;
+		
+		for (int i = 0; i < 4; i++)
+		{
+			if (ChSel & (1<<i))
+			{
+				WriteCPLD(h, 0xC02A, 1 << i);
+				ReadCPLD(h, 0xC0B7, byStatus);
+				if (byStatus)
+					ChSel = ChSel&(~(1 << i));
+			}
+		}
+		if (ChSel == 0)
+		{
+			PbUpdate(pf, 100, ChSel);
+			return;
+		}
 
 		ulRemain -= ulLen;
 		pBuf += ulLen;
 		ulStartAddr += ulLen;
 		ulPbValue = (llChipSize - ulRemain) * 100 / llChipSize;
 		PbUpdate(pf, ulPbValue, ChSel);
-	}
-	for (int i = 0; i < 4; i++)
-	{
-		if (ChSel >> i & 0x01)
-		{
-			WriteCPLD(h, 0xC02A, 1 << i);
-			do
-			{
-				ReadCPLD(h, 0xC040, byStatus);
-			} while (byStatus != 0);
-			ReadCPLD(h, 0xC0B7, byStatus);
-			if ((byStatus & 0x01))
-				ChSel = ChSel&(~(1 << i));
-		}
 	}
 }
 
@@ -1409,11 +1408,20 @@ void WINAPI SPICheckID(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 				ChSel = ChSel&(~(1 << i));
 				continue;
 			}
-			ReadCPLD(h, 0xC061 + i * 8, byStatus);
-			if (byStatus != p->wDeviceID)
+			//ReadCPLD(h, 0xC061 + i * 8, byStatus);
+			//if (byStatus != (p->wDeviceID>>8 & 0xFF))
+			//{
+			//	ChSel = ChSel&(~(1 << i));
+			//	continue;
+			//}
+			ReadCPLD(h, 0xC062 + i * 8, byStatus);
+			if (byStatus != (p->wDeviceID & 0xFF))
 			{
-				ChSel = ChSel&(~(1 << i));
-				continue;
+				if (byStatus != (p->wDeviceID >> 8 & 0xFF))
+				{
+					ChSel = ChSel&(~(1 << i));
+					continue;
+				}
 			}
 		}
 	}

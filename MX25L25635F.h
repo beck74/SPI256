@@ -21,7 +21,13 @@
 #define SPI_CMD_PP				0x02//Page Program
 #define SPI_CMD_READ			0x03//Read
 #define SPI_CMD_VERIFY			SPI_CMD_READ//Verify
+#define SPI_CMD_REID			0x9F//manufacturer & device ID
 #define SPI_CMD_REMS			0x90//manufacturer & device ID
+
+#define MX25L25635F_MSNU_ID			0xC2//manufacturer & device ID
+#define MX25L25635F_DEVICE_ID		0x20//manufacturer & device ID
+
+
 // DATA_DIRECT
 #define SPI_PROG       0X28
 #define SPI_READ       0X01
