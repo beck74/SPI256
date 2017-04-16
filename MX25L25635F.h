@@ -6,7 +6,7 @@
 #define CHECK_4BYTE_MODE		0x20//检查通道是否进入4Byte模式的标志位
 #define CHECK_WIP				0x01//检查通道是否进入4Byte模式的标志位
 
-
+#define PAGE_SIZE	512
 // CMD_NEED_WREN
 #define WREN_NEEDED    0X1 
 #define WREN_DONT_NEED  0X0 
@@ -18,8 +18,8 @@
 #define SPI_CMD_CHECK_4BYTE		0x15//Check 4Byte状态
 #define SPI_CMD_ERASE_CE1		0xC7//CHIP_ERASE
 #define SPI_CMD_ERASE_CE2		0x60//CHIP_ERASE
-#define SPI_CMD_PP				0x02//Page Program
-#define SPI_CMD_READ			0x03//Read
+#define SPI_CMD_PP				0x12//0x02//Page Program	256M用02,512M用12
+#define SPI_CMD_READ			0x13//0x03//Read			256M用03,512M用13
 #define SPI_CMD_VERIFY			SPI_CMD_READ//Verify
 #define SPI_CMD_REID			0x9F//manufacturer & device ID
 #define SPI_CMD_REMS			0x90//manufacturer & device ID
