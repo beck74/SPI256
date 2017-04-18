@@ -7,17 +7,15 @@
 #include"PbInt.h"
 #include"SpiProgrammerSetting.h"
 #include "MX25L25635F.h"
-const int BYTE_1K = 0x04;//一次读写多少个256字节 ,4*256是1K
-const int WR_BUFFER_WRITE = 16 * BYTE_1K;//32MK
-const int WR_BUFFER_READ = 32 * BYTE_1K;//32K ，读最多一次32k
+const int WR_BUFFER_WRITE = 32 * 1024 / WRITE_PAGE_SIZE;//32K
+const int WR_BUFFER_READ = 32 * 1024 / READ_PAGE_SIZE;//32K ，读最多一次32k
 const int ALLOWED_SLOTS = 4;//通道数
 
 const bool B_4BYTE = true;//是否使用4Byte模式
-const int CLK_DIV_VAL_HS = 0x02;//5倍分频
+const int CLK_DIV_VAL_HS = 0x02;//2倍分频V
 const int CLK_DIV_VAL_LS = 0x05;//5倍分频
 const ULONG StartAddr = 0;//起始地址
-//const int PAGE_SIZE = 512;//编程时，一个page的大小
-//const int ChSel = 0x0F;
+
 void Enter4ByteMode(HANDLE h, BYTE ChSel)
 {
 	CRegBuffer regBuf;
@@ -384,14 +382,14 @@ void SetWriteParam(HANDLE h,ULONG ulStartAddr, BOOL b4ByteMode,BYTE ChSel)
 	regBuf.Push(0xC811, 0x00);
 	regBuf.Push(0xC810, 0x00);
 	regBuf.Push(0xC80F, 0x00);
-	regBuf.Push(0xC80E, PAGE_SIZE / 256);
+	regBuf.Push(0xC80E, WRITE_PAGE_SIZE / 256);
 	regBuf.Push(0xC80D, 0x00);//DATA_BYTE_NUM
 							  //3.7
-	regBuf.Push(0xC816, WR_BUFFER_WRITE / PAGE_SIZE / PAGE_SIZE / PAGE_SIZE / PAGE_SIZE);
-	regBuf.Push(0xC815, WR_BUFFER_WRITE / PAGE_SIZE / PAGE_SIZE / PAGE_SIZE);
-	regBuf.Push(0xC814, WR_BUFFER_WRITE / PAGE_SIZE / PAGE_SIZE);
-	regBuf.Push(0xC813, WR_BUFFER_WRITE / PAGE_SIZE);
-	regBuf.Push(0xC812, WR_BUFFER_WRITE % PAGE_SIZE);// CMD_LOOP_NUM
+	regBuf.Push(0xC816, WR_BUFFER_WRITE / WRITE_PAGE_SIZE / WRITE_PAGE_SIZE / WRITE_PAGE_SIZE / WRITE_PAGE_SIZE);
+	regBuf.Push(0xC815, WR_BUFFER_WRITE / WRITE_PAGE_SIZE / WRITE_PAGE_SIZE / WRITE_PAGE_SIZE);
+	regBuf.Push(0xC814, WR_BUFFER_WRITE / WRITE_PAGE_SIZE / WRITE_PAGE_SIZE);
+	regBuf.Push(0xC813, WR_BUFFER_WRITE / WRITE_PAGE_SIZE);
+	regBuf.Push(0xC812, WR_BUFFER_WRITE % WRITE_PAGE_SIZE);// CMD_LOOP_NUM
 										 //3.8
 	regBuf.Push(0xC818, 0x00);
 	regBuf.Push(0xC817, 0xF0);//DAT_RDY_THRESHD *******************写入多少代码开始执行
@@ -432,14 +430,14 @@ void SetWriteParam(HANDLE h,ULONG ulStartAddr, BOOL b4ByteMode,BYTE ChSel)
 	{
 		regBuf.Push(0xC834, 0x00);
 		regBuf.Push(0xC833, 0x00);// *3Byte模式写01,4Byte模式写00
-		regBuf.Push(0xC832, PAGE_SIZE / 256);// *3Byte模式写00,4Byte模式写01
+		regBuf.Push(0xC832, WRITE_PAGE_SIZE / 256);// *3Byte模式写00,4Byte模式写01
 		regBuf.Push(0xC831, 0x00);
 		regBuf.Push(0xC830, 0x00);// CMD_ADDR_INC
 	}
 	else
 	{
 		regBuf.Push(0xC834, 0x00);
-		regBuf.Push(0xC833, PAGE_SIZE / 256);// *3Byte模式写01,4Byte模式写00
+		regBuf.Push(0xC833, WRITE_PAGE_SIZE / 256);// *3Byte模式写01,4Byte模式写00
 		regBuf.Push(0xC832, 0x00);// *3Byte模式写00,4Byte模式写01
 		regBuf.Push(0xC831, 0x00);
 		regBuf.Push(0xC830, 0x00);// CMD_ADDR_INC
@@ -503,10 +501,10 @@ void SetVerifyParam(HANDLE h, ULONG ulStartAddr, BOOL b4ByteMode, BYTE ChSel)
 	regBuf.Push(0xC80A, 0x00);
 	regBuf.Push(0xC809, 0x02);// RDSR_CHK_TARGET
 							  //3.6
-	regBuf.Push(0xC811, WR_BUFFER_READ / 256 / 256 / 256);
-	regBuf.Push(0xC810, WR_BUFFER_READ / 256 / 256);
-	regBuf.Push(0xC80F, WR_BUFFER_READ / 256);
-	regBuf.Push(0xC80E, WR_BUFFER_READ % 256);
+	regBuf.Push(0xC811, WR_BUFFER_READ / READ_PAGE_SIZE / READ_PAGE_SIZE / READ_PAGE_SIZE);
+	regBuf.Push(0xC810, WR_BUFFER_READ / READ_PAGE_SIZE / READ_PAGE_SIZE);
+	regBuf.Push(0xC80F, WR_BUFFER_READ / READ_PAGE_SIZE);
+	regBuf.Push(0xC80E, WR_BUFFER_READ % READ_PAGE_SIZE);
 	regBuf.Push(0xC80D, 0x00);//DATA_BYTE_NUM
 							  //3.7
 	regBuf.Push(0xC816, 0x00);
@@ -608,7 +606,7 @@ void SetReadParam(HANDLE h, ULONG ulStartAddr, BOOL b4ByteMode, BYTE ChSel)
 	regBuf.Push(0xC809, 0x02);// RDSR_CHK_TARGET
 				
 							  //3.6
-	regBuf.Push(0xC811, WR_BUFFER_READ / 256 / 256 / 256);
+	regBuf.Push(0xC811, WR_BUFFER_READ / READ_PAGE_SIZE / 256 / 256);
 	regBuf.Push(0xC810, WR_BUFFER_READ / 256 / 256);
 	regBuf.Push(0xC80F, WR_BUFFER_READ / 256);
 	regBuf.Push(0xC80E, WR_BUFFER_READ % 256);
@@ -1078,7 +1076,7 @@ void WINAPI SPIProgram(HANDLE h, PDEVICE p, PBYTE pBuf, PVOID pf[], BYTE &ChSel)
 	SetWriteParam(h, ulStartAddr, B_4BYTE, ChSel);
 
 	llChipSize = p->llMemSize[0];
-	ulLen = WR_BUFFER_WRITE * PAGE_SIZE;
+	ulLen = WR_BUFFER_WRITE * WRITE_PAGE_SIZE;
 	ulRemain = llChipSize;
 	PbInit(pf, ChSel);
 
